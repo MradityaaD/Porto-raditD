@@ -30,6 +30,21 @@
   <style>
     html {
       scroll-padding-top: 4rem;
+      overflow-x: hidden;
+    }
+
+    /* Cegah elemen animasi (translateX) melebarkan halaman di HP */
+    main,
+    section {
+      overflow-x: hidden;
+    }
+
+    @supports (overflow: clip) {
+
+      main,
+      section {
+        overflow-x: clip;
+      }
     }
 
     body {
