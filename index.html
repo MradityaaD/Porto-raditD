@@ -3,7 +3,8 @@
 
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- minimum-scale=1: halaman tidak bisa di-zoom out lebih kecil dari ukuran layar -->
+  <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
   <title>Muhammad Raditya Duta Pratama | Portofolio</title>
   <meta name="description" content="Portofolio Muhammad Raditya Duta Pratama - Web developer & Game developer" />
 
@@ -28,23 +29,39 @@
   </script>
 
   <style>
+    /* =====================================================
+       ANTI GESER-SAMPING (fix zoom out / geser kiri-kanan di HP)
+
+       Penyebab sebelumnya: elemen animasi (.rv-right, .h-right, dll)
+       digeser translateX 60px / 140px sebelum muncul. Di HP gutter
+       kiri-kanan cuma ~20px, jadi elemen itu keluar dari layar dan
+       Chrome menganggap lebar halaman > lebar layar. Akibatnya halaman
+       bisa di-zoom out dan digeser. Begitu di-scroll & elemen selesai
+       animasi, overflow hilang dan tampilan balik normal.
+
+       Solusi:
+       1) jarak geser animasi dibatasi sesuai lebar layar (--slide)
+       2) overflow-x: clip (bukan hidden ganda di html+body)
+       3) tiap section di-contain: paint supaya apa pun di dalamnya
+          tidak bisa melebarkan halaman
+       4) viewport meta pakai minimum-scale=1
+       ===================================================== */
+    :root {
+      --slide: min(60px, 4vw);
+      --slide-hero: min(140px, 4vw);
+    }
+
+    @media (min-width: 1024px) {
+      :root {
+        --slide: 60px;
+        --slide-hero: 140px;
+      }
+    }
+
     html {
       scroll-padding-top: 4rem;
       overflow-x: hidden;
-    }
-
-    /* Cegah elemen animasi (translateX) melebarkan halaman di HP */
-    main,
-    section {
-      overflow-x: hidden;
-    }
-
-    @supports (overflow: clip) {
-
-      main,
-      section {
-        overflow-x: clip;
-      }
+      overscroll-behavior-x: none;
     }
 
     body {
@@ -52,6 +69,26 @@
       background: #fff;
       color: #000;
       overflow-x: hidden;
+    }
+
+    main,
+    section {
+      overflow-x: hidden;
+    }
+
+    /* clip tidak membuat scroll container, jadi tidak bentrok antara html & body */
+    @supports (overflow: clip) {
+
+      html,
+      body,
+      main,
+      section {
+        overflow-x: clip;
+      }
+    }
+
+    section {
+      contain: paint;
     }
 
     .font-head {
@@ -137,11 +174,11 @@
     }
 
     .rv-left {
-      transform: translateX(-60px);
+      transform: translateX(calc(var(--slide) * -1));
     }
 
     .rv-right {
-      transform: translateX(60px);
+      transform: translateX(var(--slide));
     }
 
     .rv.in,
@@ -154,13 +191,13 @@
     /* ---------- Home ---------- */
     .h-left {
       opacity: 0;
-      transform: translateX(-140px);
+      transform: translateX(calc(var(--slide-hero) * -1));
       transition: opacity 1.1s cubic-bezier(.2, .8, .2, 1) .2s, transform 1.1s cubic-bezier(.2, .8, .2, 1) .2s;
     }
 
     .h-right {
       opacity: 0;
-      transform: translateX(140px);
+      transform: translateX(var(--slide-hero));
       transition: opacity 1.1s cubic-bezier(.2, .8, .2, 1) .2s, transform 1.1s cubic-bezier(.2, .8, .2, 1) .2s;
     }
 
@@ -216,6 +253,8 @@
       z-index: 0;
       pointer-events: none;
       user-select: none;
+      overflow: hidden;
+      /* teks raksasa tidak boleh keluar dari kotak ini */
     }
 
     .watermark span {
@@ -461,14 +500,14 @@
 
     .pj-row {
       display: grid;
-      grid-template-columns: 1fr;
+      grid-template-columns: minmax(0, 1fr);
       gap: 1.5rem;
       align-items: center;
     }
 
     @media (min-width: 768px) {
       .pj-row {
-        grid-template-columns: 1fr 1fr;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
         gap: 3rem;
       }
 
@@ -596,6 +635,8 @@
     }
 
     /* ---------- Transisi layar (navbar) ---------- */
+    /* visibility: hidden saat idle supaya panel yang nongkrong di luar layar
+       tidak ikut dihitung sebagai konten halaman */
     .trans {
       position: fixed;
       inset: 0;
@@ -607,6 +648,8 @@
       gap: 1.2rem;
       transform: translateY(100%);
       pointer-events: none;
+      visibility: hidden;
+      overflow: hidden;
     }
 
     .trans.dark {
@@ -622,12 +665,14 @@
     }
 
     .trans.enter {
+      visibility: visible;
       transform: none;
       pointer-events: auto;
       transition: transform .65s cubic-bezier(.76, 0, .24, 1);
     }
 
     .trans.leave {
+      visibility: visible;
       transform: translateY(-100%);
       pointer-events: auto;
       transition: transform .65s cubic-bezier(.76, 0, .24, 1);
@@ -768,8 +813,8 @@
       <div class="max-w-6xl mx-auto px-5 sm:px-8">
         <h2 class="rv font-head font-bold text-4xl sm:text-5xl lg:text-6xl">About me</h2>
 
-        <div class="mt-8 sm:mt-10 grid lg:grid-cols-2 gap-6 items-stretch">
-          <div class="glass rv-left overflow-hidden flex flex-col">
+        <div class="mt-8 sm:mt-10 grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
+          <div class="glass rv-left overflow-hidden flex flex-col min-w-0">
             <div class="flex items-center gap-2 px-4 py-3 border-b border-white/10">
               <span class="w-3 h-3 rounded-full bg-white"></span>
               <span class="w-3 h-3 rounded-full bg-white/50"></span>
@@ -781,7 +826,7 @@
           </div>
 
           <div
-            class="glass rv-right p-6 sm:p-8 space-y-4 text-[14px] sm:text-[15px] leading-relaxed text-white/85 flex flex-col justify-center">
+            class="glass rv-right p-6 sm:p-8 space-y-4 text-[14px] sm:text-[15px] leading-relaxed text-white/85 flex flex-col justify-center min-w-0">
             <p>Siswa aktif SMK TI Dwi Guna jurusan PPLG (Pengembangan Perangkat Lunak dan Gim) yang disiplin, memiliki
               motivasi belajar tinggi, serta siap mengikuti program PKL untuk menambah pengalaman di dunia kerja.
               Memiliki pemahaman dasar pemrograman, pengoperasian komputer, problem solving, dan mampu bekerja sama
@@ -827,7 +872,7 @@
                 onerror="this.style.opacity=0" />
               <span class="pj-num">01</span>
             </div>
-            <div class="rv-right">
+            <div class="rv-right min-w-0">
               <p class="pj-label">Web</p>
               <h3 class="font-head font-bold text-3xl sm:text-4xl mt-2">Website Sederhana</h3>
               <p class="mt-4 text-[14px] sm:text-[15px] leading-relaxed text-white/75">
@@ -853,7 +898,7 @@
                 onerror="this.style.opacity=0" />
               <span class="pj-num">02</span>
             </div>
-            <div class="rv-left">
+            <div class="rv-left min-w-0">
               <p class="pj-label">Desain</p>
               <h3 class="font-head font-bold text-3xl sm:text-4xl mt-2">Desain Antarmuka Aplikasi</h3>
               <p class="mt-4 text-[14px] sm:text-[15px] leading-relaxed text-white/75">
@@ -879,7 +924,7 @@
                 onerror="this.style.opacity=0" />
               <span class="pj-num">03</span>
             </div>
-            <div class="rv-right">
+            <div class="rv-right min-w-0">
               <p class="pj-label">Game</p>
               <h3 class="font-head font-bold text-3xl sm:text-4xl mt-2">Game Flappy Bird 2D</h3>
               <p class="mt-4 text-[14px] sm:text-[15px] leading-relaxed text-white/75">
