@@ -30,9 +30,7 @@
     html {
       scroll-behavior: smooth;
       scroll-padding-top: var(--nav);
-      -webkit-text-size-adjust: 100%;
-      overflow-x: hidden;
-      max-width: 100%
+      -webkit-text-size-adjust: 100%
     }
 
     body {
@@ -40,22 +38,7 @@
       background: var(--paper);
       color: var(--ink);
       line-height: 1.6;
-      overflow-x: hidden;
-      max-width: 100%;
-      position: relative
-    }
-
-    main {
-      overflow-x: hidden;
-      overflow-x: clip;
-      width: 100%
-    }
-
-    .about>*,
-    .proj>*,
-    .grid3>*,
-    .hero>* {
-      min-width: 0
+      overflow-x: hidden
     }
 
     h1,
@@ -79,9 +62,7 @@
 
     section {
       padding: 96px 0;
-      position: relative;
-      overflow-x: hidden;
-      overflow-x: clip
+      position: relative
     }
 
     .dark {
@@ -781,6 +762,7 @@
       transform: translate(4px, -4px)
     }
 
+
     /* SLIDE KIRI-KANAN */
     .rv.sl {
       transform: translateX(-90px)
@@ -1083,106 +1065,6 @@
       pointer-events: none
     }
 
-    /* MODAL KIRIM PESAN GMAIL */
-    .modal {
-      position: fixed;
-      inset: 0;
-      z-index: 100;
-      background: rgba(0, 0, 0, .6);
-      display: grid;
-      place-items: center;
-      padding: 20px;
-      opacity: 0;
-      visibility: hidden;
-      transition: .3s
-    }
-
-    .modal.show {
-      opacity: 1;
-      visibility: visible
-    }
-
-    .m-box {
-      position: relative;
-      width: min(440px, 100%);
-      max-height: 100%;
-      overflow: auto;
-      background: #fff;
-      color: #000;
-      border: 2px solid #000;
-      border-radius: 24px;
-      padding: 28px;
-      transform: translateY(24px);
-      transition: .3s
-    }
-
-    .modal.show .m-box {
-      transform: none
-    }
-
-    .m-box h3 {
-      font-size: 1.5rem;
-      margin-bottom: 4px
-    }
-
-    .m-x {
-      position: absolute;
-      top: 14px;
-      right: 16px;
-      width: 36px;
-      height: 36px;
-      border: 1.5px solid #000;
-      border-radius: 50%;
-      background: none;
-      font-size: 1.3rem;
-      cursor: pointer
-    }
-
-    #mailForm {
-      display: grid;
-      gap: 12px;
-      margin-top: 18px
-    }
-
-    #mailForm input,
-    #mailForm textarea {
-      width: 100%;
-      padding: 12px 14px;
-      border: 1.5px solid #000;
-      border-radius: 12px;
-      font: inherit;
-      background: #fff;
-      resize: vertical
-    }
-
-    #mailForm input:focus,
-    #mailForm textarea:focus {
-      outline: 0;
-      box-shadow: 4px 4px 0 #000
-    }
-
-    #mailForm .btn {
-      justify-content: center
-    }
-
-    #mailForm .btn:disabled {
-      opacity: .6;
-      cursor: wait
-    }
-
-    #mailStatus {
-      font-size: .85rem;
-      min-height: 1.2em
-    }
-
-    .m-alt {
-      display: block;
-      margin-top: 14px;
-      font-size: .85rem;
-      text-align: center;
-      text-decoration: underline
-    }
-
     /* REVEAL */
     .rv {
       opacity: 0;
@@ -1387,10 +1269,78 @@
         color: #000
       }
     }
+
+
+
+    /* TIRAI TRANSISI NAVBAR (warna ikut section tujuan) */
+    #curtain {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      display: grid;
+      place-items: center;
+      pointer-events: none;
+      visibility: hidden;
+      transform: translateY(-100%);
+      background: #000;
+      color: #fff;
+      will-change: transform
+    }
+
+    #curtain span {
+      font: 700 clamp(2.6rem, 12vw, 7rem)/1 'Space Grotesk', sans-serif;
+      letter-spacing: -.03em;
+      opacity: 0;
+      transform: translateY(24px)
+    }
+
+    #curtain.go {
+      visibility: visible;
+      pointer-events: auto;
+      animation: cIn .42s cubic-bezier(.7, 0, .2, 1) forwards
+    }
+
+    #curtain.go span {
+      animation: cTxt .45s .22s ease forwards
+    }
+
+    #curtain.out {
+      visibility: visible;
+      animation: cOut .5s cubic-bezier(.7, 0, .2, 1) forwards
+    }
+
+    #curtain.out span {
+      opacity: 1;
+      transform: none
+    }
+
+    @keyframes cIn {
+      to {
+        transform: none
+      }
+    }
+
+    @keyframes cOut {
+      from {
+        transform: none
+      }
+
+      to {
+        transform: translateY(100%)
+      }
+    }
+
+    @keyframes cTxt {
+      to {
+        opacity: 1;
+        transform: none
+      }
+    }
   </style>
 </head>
 
 <body>
+  <div id="curtain" aria-hidden="true"><span></span></div>
 
   <header>
     <div class="wrap nav">
@@ -1593,10 +1543,11 @@
               <h3>WhatsApp</h3><small>Buka aplikasi WhatsApp</small><span class="val">+6285774464144</span>
             </div><span class="ghost">WA</span>
           </a>
-          <a class="c-card rv" href="#" id="openMail">
+          <a class="c-card rv" id="mailCard" href="mailto:pratamaraditya98@gmail.com">
             <div class="c-top"><span class="ic">@</span><span>↗</span></div>
             <div>
-              <h3>Gmail</h3><small>Kirim pesan langsung</small><span class="val">pratamaradityaa98@gmail.com</span>
+              <h3>Gmail</h3><small>Tulis pesan langsung di Gmail</small><span
+                class="val">pratamaraditya98@gmail.com</span>
             </div><span class="ghost">@</span>
           </a>
           <a class="c-card rv" href="https://github.com/MradityaaD" target="_blank" rel="noopener">
@@ -1608,26 +1559,8 @@
         </div>
       </div>
     </section>
-
-    <!-- MODAL KIRIM PESAN -->
-    <div class="modal" id="mailModal" role="dialog" aria-modal="true" aria-labelledby="mailTitle">
-      <div class="m-box">
-        <button class="m-x" data-close aria-label="Tutup">×</button>
-        <h3 id="mailTitle">Kirim Pesan</h3>
-        <p class="mute">Pesan langsung masuk ke Gmail saya.</p>
-        <form id="mailForm">
-          <input name="nama" placeholder="Nama kamu" required>
-          <input name="email" type="email" placeholder="Email kamu" required>
-          <textarea name="pesan" rows="5" placeholder="Tulis pesan..." required></textarea>
-          <button class="btn fill" type="submit">Kirim Pesan</button>
-          <small id="mailStatus" aria-live="polite"></small>
-        </form>
-        <a class="m-alt" target="_blank" rel="noopener"
-          href="https://mail.google.com/mail/?view=cm&fs=1&to=pratamaradityaa98@gmail.com&su=Halo%20Raditya">atau buka
-          langsung di Gmail ↗</a>
-      </div>
-    </div>
   </main>
+
 
   <script>
     // Siapkan efek ketik: tiap baris dibungkus, durasi dihitung sekali saja
@@ -1678,23 +1611,51 @@
     var so = new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) { links.forEach(function (a) { a.classList.toggle('active', a.getAttribute('href') === '#' + e.target.id) }) } }) }, { rootMargin: '-45% 0px -50% 0px' });
     ['about', 'skills', 'projects', 'contact'].forEach(function (id) { so.observe(document.getElementById(id)) });
 
-    // Form kirim pesan ke Gmail (lewat FormSubmit)
-    var modal = document.getElementById('mailModal'), form = document.getElementById('mailForm'), st = document.getElementById('mailStatus');
-    document.getElementById('openMail').addEventListener('click', function (e) { e.preventDefault(); modal.classList.add('show') });
-    modal.addEventListener('click', function (e) { if (e.target === modal || e.target.hasAttribute('data-close')) modal.classList.remove('show') });
-    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') modal.classList.remove('show') });
-    form.addEventListener('submit', function (e) {
-      e.preventDefault();
-      var btn = form.querySelector('button[type=submit]'); btn.disabled = true; st.textContent = 'Mengirim...';
-      fetch('https://formsubmit.co/ajax/pratamaradityaa98@gmail.com', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-        body: JSON.stringify({ name: form.nama.value, email: form.email.value, message: form.pesan.value, _subject: 'Pesan baru dari portofolio', _replyto: form.email.value })
-      }).then(function (r) { return r.json() }).then(function () {
-        st.textContent = 'Terkirim! Terima kasih.'; form.reset();
-      }).catch(function () { st.textContent = 'Gagal kirim, coba lagi.' })
-        .finally(function () { btn.disabled = false });
-    });
+    // Gmail: klik langsung buka layar tulis pesan (Kepada, Subjek, Isi pesan)
+    (function () {
+      var card = document.getElementById('mailCard'), TO = 'pratamaraditya28@gmail.com',
+        SU = 'Halo Raditya, saya ingin menghubungi kamu', BODY = 'Halo Raditya,\n\n';
+      var q = 'subject=' + encodeURIComponent(SU) + '&body=' + encodeURIComponent(BODY);
+      card.href = 'mailto:' + TO + '?' + q;
+      card.addEventListener('click', function (e) {
+        var ua = navigator.userAgent;
+        if (/iPhone|iPad|iPod/i.test(ua)) {
+          e.preventDefault();
+          location.href = 'googlegmail:///co?to=' + TO + '&' + q;
+          setTimeout(function () { if (!document.hidden) location.href = 'mailto:' + TO + '?' + q }, 900);
+        } else if (!/Android/i.test(ua)) {
+          e.preventDefault();
+          window.open('https://mail.google.com/mail/?view=cm&fs=1&to=' + TO + '&su=' + encodeURIComponent(SU) + '&body=' + encodeURIComponent(BODY), '_blank', 'noopener');
+        }
+      });
+    })();
+
+    // Transisi tirai saat menu diklik: warna tirai & teks ikut background section tujuan
+    (function () {
+      var c = document.getElementById('curtain'), t = c.firstElementChild, busy = false,
+        reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      document.querySelectorAll('.menu a,.logo').forEach(function (a) {
+        a.addEventListener('click', function (e) {
+          var id = a.getAttribute('href'), target = document.querySelector(id);
+          if (!target || reduce) return;
+          e.preventDefault();
+          if (busy) return; busy = true;
+          var dark = target.classList.contains('dark');
+          c.style.background = dark ? '#000' : '#fff';
+          c.style.color = dark ? '#fff' : '#000';
+          t.textContent = a.classList.contains('logo') ? 'Home' : a.textContent.trim();
+          c.className = 'go';
+          setTimeout(function () {
+            target.scrollIntoView({ behavior: 'instant', block: 'start' });
+            history.replaceState(null, '', id);
+          }, 440);
+          setTimeout(function () {
+            c.className = 'out';
+            setTimeout(function () { c.className = ''; busy = false }, 520);
+          }, 900);
+        });
+      });
+    })();
   </script>
 </body>
 
