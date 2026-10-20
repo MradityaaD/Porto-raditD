@@ -2,7 +2,7 @@
 
 Website portofolio pribadi saya sebagai siswa PPLG (Pengembangan Perangkat Lunak dan Gim) di SMK TI Dwi Guna. Dibuat dengan HTML, Tailwind CSS, dan JavaScript murni tanpa framework.
 
-**Live demo:** https://mradityaad.github.io/Porto-radit/
+**Live demo:** https://mradityaad.github.io/Porto-raditD/
 
 ## Tentang
 
