@@ -808,7 +808,7 @@
       }
     }
 
-    /* ANIMASI KODE: efek ketik ringan (CSS steps, tanpa loop JS) */
+    /* ANIMASI KODE */
     .ln {
       display: block;
       min-height: 1.75em;
@@ -1440,10 +1440,70 @@
       min-width: min(300px, 100%);
       justify-content: center
     }
+
+    /* TIRAI TRANSISI NAVBAR */
+    .curtain {
+      position: fixed;
+      inset: 0;
+      z-index: 200;
+      pointer-events: none;
+      visibility: hidden
+    }
+
+    .curtain.run {
+      visibility: visible;
+      pointer-events: all
+    }
+
+    .cp {
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 50.5%;
+      background: var(--cb, #000);
+      transition: transform .55s cubic-bezier(.7, 0, .2, 1)
+    }
+
+    .cp.t {
+      top: 0;
+      transform: translateY(-101%)
+    }
+
+    .cp.b {
+      bottom: 0;
+      transform: translateY(101%)
+    }
+
+    .curtain.close .cp {
+      transform: none
+    }
+
+    .cl {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      font: 700 clamp(2.4rem, 10vw, 6rem) 'Space Grotesk', sans-serif;
+      letter-spacing: -.02em;
+      color: var(--ct, #fff);
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity .25s, transform .25s
+    }
+
+    .curtain.close .cl {
+      opacity: 1;
+      transform: none;
+      transition: opacity .4s .35s, transform .4s .35s
+    }
   </style>
 </head>
 
 <body>
+
+  <div class="curtain" id="curtain" aria-hidden="true">
+    <i class="cp t"></i><i class="cp b"></i><span class="cl" id="curtainLabel"></span>
+  </div>
 
   <header>
     <div class="wrap nav">
@@ -1467,7 +1527,8 @@
         <div class="tag tag-l">Web<br>developer<p>Membangun antarmuka yang bersih, cepat, dan nyaman dipakai di semua
             perangkat.</p>
         </div>
-        <div class="photo"><img id="foto" src="spidurman-removebg-preview.png" alt="Foto Muhammad Raditya Duta Pratama"></div>
+        <div class="photo"><img id="foto" src="spidurman-removebg-preview.png" alt="Foto Muhammad Raditya Duta Pratama">
+        </div>
         <div class="tag tag-r">Game<br>developer<p>Dari web app sampai game sederhana, saya suka mengubah ide menjadi
             sesuatu yang bisa dimainkan.</p>
         </div>
@@ -1573,8 +1634,8 @@
 
         <article class="proj">
           <div class="shot rv sl">
-            <div class="inner"><img class="pimg" src="web.png" alt="Tampilan project Website Sederhana"
-                loading="lazy"></div><span class="num">01</span>
+            <div class="inner"><img class="pimg" src="web.png" alt="Tampilan project Website Sederhana" loading="lazy">
+            </div><span class="num">01</span>
           </div>
           <div class="ptxt rv sr"><span class="kicker">WEB</span>
             <h3>Website Sederhana</h3>
@@ -1613,8 +1674,8 @@
 
         <article class="proj">
           <div class="shot rv sl">
-            <div class="inner"><img class="pimg" src="game.png" alt="Tampilan project Game Flappy Bird"
-                loading="lazy"></div><span class="num">03</span>
+            <div class="inner"><img class="pimg" src="game.png" alt="Tampilan project Game Flappy Bird" loading="lazy">
+            </div><span class="num">03</span>
           </div>
           <div class="ptxt rv sr"><span class="kicker">GAME</span>
             <h3>Game Flappy Bird</h3>
@@ -1682,7 +1743,7 @@
   </main>
 
   <script>
-    // Siapkan efek ketik: tiap baris dibungkus, durasi dihitung sekali saja
+    // Efek ketik kode
     (function () {
       var pre = document.querySelector('.code pre'), tmp = document.createElement('div'), d = 0.4, per = 0.022, out = [];
       var lines = pre.innerHTML.split('\n');
@@ -1705,35 +1766,88 @@
     navA.forEach(function (a) {
       var s = document.querySelector(a.getAttribute('href')), d = s && s.classList.contains('dark');
       a.style.setProperty('--fb', d ? '#000' : '#fff'); a.style.setProperty('--ft', d ? '#fff' : '#000');
-      a.addEventListener('click', function () {
-        navA.forEach(function (x) { x.classList.toggle('active', x === a) });
-        a.classList.remove('go'); void a.offsetWidth; a.classList.add('go');
-        setTimeout(function () { burger.classList.remove('open'); menu.classList.remove('open') }, 420);
-      });
       a.addEventListener('animationend', function () { a.classList.remove('go') });
     });
 
-    // Parallax nama (sekali per frame scroll, tanpa loop terus-menerus)
-    var home = document.getElementById('home'), tick = false, hdr = document.querySelector('header'), darks = [].slice.call(document.querySelectorAll('section.dark')), wasDark = false;
+    // Tirai transisi: tutup -> pindah halaman -> buka
+    var curtain = document.getElementById('curtain'), curLabel = document.getElementById('curtainLabel'), busy = false;
+    var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var NAV_H = 68;
+
+    function jumpTo(sec) {
+      var de = document.documentElement;
+      de.style.scrollBehavior = 'auto';
+      var top = sec.id === 'home' ? 0 : sec.getBoundingClientRect().top + window.scrollY - NAV_H;
+      window.scrollTo(0, Math.max(0, top));
+      par();
+      de.style.scrollBehavior = '';
+    }
+
+    function transition(href, label, link) {
+      var sec = document.querySelector(href);
+      if (!sec) return;
+      burger.classList.remove('open'); menu.classList.remove('open');
+      if (reduce) { jumpTo(sec); return }
+      if (busy) return;
+      busy = true;
+      var dark = sec.classList.contains('dark');
+      curtain.style.setProperty('--cb', dark ? '#000' : '#fff');
+      curtain.style.setProperty('--ct', dark ? '#fff' : '#000');
+      curLabel.textContent = label;
+      curtain.classList.add('run');
+      void curtain.offsetWidth;
+      curtain.classList.add('close');            // tirai menutup
+      setTimeout(function () {
+        jumpTo(sec);                              // pindah saat layar tertutup
+        setTimeout(function () {
+          curtain.classList.remove('close');      // tirai membuka
+          if (link) { link.classList.remove('go'); void link.offsetWidth; link.classList.add('go') }
+          setTimeout(function () { curtain.classList.remove('run'); busy = false }, 650);
+        }, 350);
+      }, 950);
+    }
+
+    navA.forEach(function (a) {
+      a.addEventListener('click', function (e) {
+        e.preventDefault();
+        transition(a.getAttribute('href'), a.textContent.trim(), a);
+      });
+    });
+    document.querySelector('.logo').addEventListener('click', function (e) {
+      e.preventDefault(); transition('#home', 'Home', null);
+    });
+
+    // Parallax nama + warna navbar + tanda menu aktif (berdasarkan posisi scroll)
+    var home = document.getElementById('home'), tick = false, hdr = document.querySelector('header'),
+      darks = [].slice.call(document.querySelectorAll('section.dark')), wasDark = false,
+      secIds = ['home', 'about', 'skills', 'projects', 'contact'];
+
+    function currentSection() {
+      var y = window.innerHeight * 0.45, cur = 'home';
+      secIds.forEach(function (id) {
+        var r = document.getElementById(id).getBoundingClientRect();
+        if (r.top <= y && r.bottom > y) cur = id;
+      });
+      return cur;
+    }
+
     function par() {
       var y = Math.min(window.scrollY, home.offsetHeight), k = y * 0.35;
       home.style.setProperty('--px', k + 'px');
       home.style.setProperty('--nx', (-k) + 'px');
       var dk = darks.some(function (el) { var r = el.getBoundingClientRect(); return r.top <= 34 && r.bottom > 34 });
       if (dk !== wasDark) { wasDark = dk; hdr.classList.toggle('on-dark', dk) }
+      var cur = currentSection();   // di Home -> tidak ada menu yang aktif
+      navA.forEach(function (a) { a.classList.toggle('active', a.getAttribute('href') === '#' + cur) });
       tick = false;
     }
     par();
     window.addEventListener('scroll', function () { if (!tick) { tick = true; requestAnimationFrame(par) } }, { passive: true });
+    window.addEventListener('resize', par);
 
     // Reveal saat scroll
     var io = new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target) } }) }, { threshold: .15 });
     document.querySelectorAll('.rv').forEach(function (el) { io.observe(el) });
-
-    // Menu aktif sesuai section
-    var links = [].slice.call(menu.querySelectorAll('a'));
-    var so = new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) { links.forEach(function (a) { a.classList.toggle('active', a.getAttribute('href') === '#' + e.target.id) }) } }) }, { rootMargin: '-45% 0px -50% 0px' });
-    ['about', 'skills', 'projects', 'contact'].forEach(function (id) { so.observe(document.getElementById(id)) });
 
     // Form kirim pesan ke Gmail (lewat FormSubmit)
     var modal = document.getElementById('mailModal'), form = document.getElementById('mailForm'), st = document.getElementById('mailStatus');
